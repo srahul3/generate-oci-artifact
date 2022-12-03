@@ -26,7 +26,8 @@ export async function generate(): Promise<void> {
 
     const TOKEN: string = core.getInput('token')
     core.setSecret(TOKEN)
-    const auth = Buffer.from(`:${TOKEN}`).toString('base64')
+    const auth = CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(TOKEN))    
+    console.log(`auth: ${auth}`)
     core.setSecret(auth)
 
     // create the manifest
@@ -47,21 +48,29 @@ export async function generate(): Promise<void> {
     const layers_manifest : any[] = []
 
     for (let i = 0; i < layers_count; i++) {
-      const input_layer: string = core.getInput(`layer_${i}`) || ''
-      const layer_media_type: string = core.getInput(`layer_${i}.media_type`) || ''
-      const layer_blob_path: string = core.getInput(`layer_${i}.blob_path`) || ''
+      const input_layer: any = core.getInput(`layer_${i}`) || ''
+      const layer_media_type: string = input_layer.media_type || ''      
+      const layer_blob_path: string = input_layer.blob_path || ''
+      var path = require("path");
+      var absolutePath = path.resolve(layer_blob_path);
+      console.log(`absolutePath: ${absolutePath}`)
       const file_stream = fs.createReadStream(layer_blob_path)
       
-      const response = await axios.post(
-        `https://ghcr.io/v2/${repository}/blobs/uploads/`,
-        {
-          headers: {            
-            'Content-Type': "application/octet-stream",
-            'Content-Length': "0",
-            'Authorization': 'Bearer ${auth}',        
-          }
+      console.log(`creating layer ${i}`)
+
+      var config = {
+        method: 'post',
+        url: `https://ghcr.io/v2/${repository}/blobs/uploads/`,
+        headers: { 
+          'Content-Type': 'application/octet-stream', 
+          'Content-Length': '0', 
+          'Authorization': `Bearer ${auth}`
         }
-      )
+      }
+
+      const response = await axios(config)      
+      
+      console.log(`response: ${response}`)
       
       if (response.status !== 202) {
         core.setFailed(`Could not upload layer ${i}!`)
@@ -83,6 +92,7 @@ export async function generate(): Promise<void> {
         const chunk = file_stream.read(end - start)
         const upload_chunk_size = end - start
         
+        console.log(`creating layer ${i} chunk ${j} of ${chunks} size ${upload_chunk_size}`)
         const response = await axios.patch(
           location, chunk,
           {

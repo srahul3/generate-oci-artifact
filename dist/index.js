@@ -215,6 +215,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.run = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const docker_api = __importStar(__nccwpck_require__(4786));
 function run() {
@@ -228,6 +229,7 @@ function run() {
         }
     });
 }
+exports.run = run;
 run();
 
 
