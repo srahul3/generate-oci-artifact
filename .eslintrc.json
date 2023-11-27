@@ -1,6 +1,10 @@
 {
-    "plugins": ["jest", "@typescript-eslint"],
-    "extends": ["plugin:github/recommended"],
+  "root": true,  
+  "plugins": ["jest", "@typescript-eslint"],
+    "extends": [
+      "eslint:recommended",
+      "plugin:@typescript-eslint/recommended"
+    ],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
       "ecmaVersion": 9,
