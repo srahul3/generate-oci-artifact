@@ -1,5 +1,5 @@
 import * as core from '@actions/core'
-import axios from 'axios'
+import axios, { AxiosRequestConfig } from 'axios'
 import * as fs from 'fs'
 import * as github from '@actions/github'
 import * as CryptoJS from 'crypto-js'
@@ -58,15 +58,16 @@ export async function generate(): Promise<void> {
       
       console.log(`creating layer ${i}`)
 
-      var config = {
-        method: 'post',
+      // upload the layer
+      const config: AxiosRequestConfig = {
+        method: 'post', // e.g., 'get', 'post', etc.
         url: `https://ghcr.io/v2/${repository}/blobs/uploads/`,
         headers: { 
           'Content-Type': 'application/octet-stream', 
           'Content-Length': '0', 
           'Authorization': `Bearer ${auth}`
-        }
-      }
+        },
+      };
 
       const response = await axios(config)      
       
